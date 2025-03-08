@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 
 const Explore = () => {
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [timeFrame, setTimeFrame] = useState<'today' | 'next48hours' | 'all'>('next48hours');
+  const [timeFrame, setTimeFrame] = useState<'today' | 'next48hours' | 'all'>('all');
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedExperience, setSelectedExperience] = useState<Experience | null>(null);
@@ -48,6 +48,15 @@ const Explore = () => {
     }, 60 * 60 * 1000); // 1 hour
     
     return () => clearInterval(interval);
+  }, []);
+  
+  // Ensure that we're showing all events on page load
+  useEffect(() => {
+    setTimeFrame('all');
+    setSelectedCities([]);
+    setShowOnlyTrending(false);
+    setShowOnlyHiddenGems(false);
+    setShowOnlyFlashDeals(false);
   }, []);
   
   const cities = getAllCities();
@@ -110,6 +119,9 @@ const Explore = () => {
   const hiddenGemExperiences = getHiddenGemExperiences();
   const flashDealExperiences = getFlashDealExperiences();
   
+  // Used to prevent rendering TabsContent elements until we have data - fixes the React error
+  const hasExperiences = experiences.length > 0;
+  
   return (
     <>
       <Header />
@@ -158,7 +170,7 @@ const Explore = () => {
                   <Switch 
                     id="today-only"
                     checked={timeFrame === 'today'} 
-                    onCheckedChange={(checked) => setTimeFrame(checked ? 'today' : 'next48hours')}
+                    onCheckedChange={(checked) => setTimeFrame(checked ? 'today' : 'all')}
                   />
                   <Label htmlFor="today-only" className="text-sm cursor-pointer">Today only</Label>
                 </div>
@@ -309,122 +321,125 @@ const Explore = () => {
                 Flash Deals
               </TabsTrigger>
             </TabsList>
+          
+            <div className="mb-6 mt-4">
+              <h1 className="text-2xl font-bold mb-2">
+                {activeTab === 'all' && 'Explore Events'}
+                {activeTab === 'trending' && 'Trending Events'}
+                {activeTab === 'hidden-gems' && 'Hidden Gems'}
+                {activeTab === 'flash-deals' && 'Flash Deals'}
+              </h1>
+              <p className="text-muted-foreground">
+                {activeTab === 'all' && `${filteredExperiences.length} events in ${selectedCities.length > 0 ? selectedCities.join(', ') : 'KWCG region'}`}
+                {activeTab === 'trending' && `${trendingExperiences.length} events everyone's talking about`}
+                {activeTab === 'hidden-gems' && `${hiddenGemExperiences.length} unique experiences you might have missed`}
+                {activeTab === 'flash-deals' && `${flashDealExperiences.length} limited-time deals available now`}
+                {timeFrame === 'today' && ' happening today'}
+                {timeFrame === 'next48hours' && ' in the next 48 hours'}
+              </p>
+            </div>
+          
+            {hasExperiences && (
+              <>
+                <TabsContent value="all">
+                  {filteredExperiences.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredExperiences.map((exp) => (
+                        <ExperienceCard 
+                          key={exp.id}
+                          experience={exp}
+                          onClick={handleExperienceClick}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                        <Search className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">No events found</h3>
+                      <p className="text-muted-foreground text-center max-w-md mb-6">
+                        Try adjusting your filters or search query to find events that match your preferences.
+                      </p>
+                      <Button onClick={() => {
+                        setSelectedInterests([]);
+                        setSelectedCities([]);
+                        setTimeFrame('all');
+                        setSearchQuery('');
+                        setMaxPrice(100);
+                        setShowOnlyTrending(false);
+                        setShowOnlyHiddenGems(false);
+                        setShowOnlyFlashDeals(false);
+                      }}>
+                        Clear all filters
+                      </Button>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="trending">
+                  {trendingExperiences.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {trendingExperiences.map((exp) => (
+                        <ExperienceCard 
+                          key={exp.id}
+                          experience={exp}
+                          onClick={handleExperienceClick}
+                          featured={true}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <p className="text-muted-foreground text-center">
+                        No trending events available at the moment. Check back soon!
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="hidden-gems">
+                  {hiddenGemExperiences.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {hiddenGemExperiences.map((exp) => (
+                        <ExperienceCard 
+                          key={exp.id}
+                          experience={exp}
+                          onClick={handleExperienceClick}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <p className="text-muted-foreground text-center">
+                        No hidden gem events available at the moment. Check back soon!
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="flash-deals">
+                  {flashDealExperiences.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {flashDealExperiences.map((exp) => (
+                        <ExperienceCard 
+                          key={exp.id}
+                          experience={exp}
+                          onClick={handleExperienceClick}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <p className="text-muted-foreground text-center">
+                        No flash deals available at the moment. Check back soon!
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </>
+            )}
           </Tabs>
-          
-          {/* Results */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-2">
-              {activeTab === 'all' && 'Explore Events'}
-              {activeTab === 'trending' && 'Trending Events'}
-              {activeTab === 'hidden-gems' && 'Hidden Gems'}
-              {activeTab === 'flash-deals' && 'Flash Deals'}
-            </h1>
-            <p className="text-muted-foreground">
-              {activeTab === 'all' && `${filteredExperiences.length} events in ${selectedCities.length > 0 ? selectedCities.join(', ') : 'KWCG region'}`}
-              {activeTab === 'trending' && `${trendingExperiences.length} events everyone's talking about`}
-              {activeTab === 'hidden-gems' && `${hiddenGemExperiences.length} unique experiences you might have missed`}
-              {activeTab === 'flash-deals' && `${flashDealExperiences.length} limited-time deals available now`}
-              {timeFrame === 'today' && ' happening today'}
-              {timeFrame === 'next48hours' && ' in the next 48 hours'}
-            </p>
-          </div>
-          
-          <TabsContent value="all">
-            {filteredExperiences.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredExperiences.map((exp) => (
-                  <ExperienceCard 
-                    key={exp.id}
-                    experience={exp}
-                    onClick={handleExperienceClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <Search className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">No events found</h3>
-                <p className="text-muted-foreground text-center max-w-md mb-6">
-                  Try adjusting your filters or search query to find events that match your preferences.
-                </p>
-                <Button onClick={() => {
-                  setSelectedInterests([]);
-                  setSelectedCities([]);
-                  setTimeFrame('next48hours');
-                  setSearchQuery('');
-                  setMaxPrice(100);
-                  setShowOnlyTrending(false);
-                  setShowOnlyHiddenGems(false);
-                  setShowOnlyFlashDeals(false);
-                }}>
-                  Clear all filters
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="trending">
-            {trendingExperiences.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {trendingExperiences.map((exp) => (
-                  <ExperienceCard 
-                    key={exp.id}
-                    experience={exp}
-                    onClick={handleExperienceClick}
-                    featured={true}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16">
-                <p className="text-muted-foreground text-center">
-                  No trending events available at the moment. Check back soon!
-                </p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="hidden-gems">
-            {hiddenGemExperiences.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {hiddenGemExperiences.map((exp) => (
-                  <ExperienceCard 
-                    key={exp.id}
-                    experience={exp}
-                    onClick={handleExperienceClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16">
-                <p className="text-muted-foreground text-center">
-                  No hidden gem events available at the moment. Check back soon!
-                </p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="flash-deals">
-            {flashDealExperiences.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {flashDealExperiences.map((exp) => (
-                  <ExperienceCard 
-                    key={exp.id}
-                    experience={exp}
-                    onClick={handleExperienceClick}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16">
-                <p className="text-muted-foreground text-center">
-                  No flash deals available at the moment. Check back soon!
-                </p>
-              </div>
-            )}
-          </TabsContent>
         </div>
       </main>
       
