@@ -34,7 +34,7 @@ const Index = () => {
     setShowBookingModal(true);
   };
   
-  const todaysExperiences = filterExperiences(selectedInterests, true);
+  const todaysExperiences = filterExperiences(selectedInterests, 'today');
   const recommendedExperiences = filterExperiences(selectedInterests).slice(0, 6);
   
   return (
