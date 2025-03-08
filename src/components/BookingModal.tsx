@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Experience } from '@/lib/data';
-import { Clock, Calendar, CreditCard, AppleIcon, Phone } from 'lucide-react';
+import { Experience, getDisplayPrice } from '@/lib/data';
+import { Clock, Calendar, CreditCard, AppleIcon, Phone, MapPin, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { format } from 'date-fns';
 
 // Initialize Stripe - Replace with your Stripe publishable key
 const stripePromise = loadStripe('pk_test_51OxJyJEZOqyXwEhKf2RMGgNd34VuRTXtR0vL5TRTc1C7OLFTnFgJ6L9rFX6Z7ixaL6kgJHCFdkDYxl1vXvPfYoVx00JCvOAHs0');
@@ -36,6 +37,7 @@ const PaymentForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
+  const displayPrice = getDisplayPrice(experience);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +78,9 @@ const PaymentForm = ({
     }
   };
 
+  const serviceFee = displayPrice * 0.1;
+  const totalPrice = displayPrice + serviceFee;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="p-4 border rounded-md bg-background">
@@ -96,16 +101,25 @@ const PaymentForm = ({
       </div>
       
       <div className="flex justify-between mb-2">
-        <span className="text-muted-foreground">Experience Price</span>
-        <span>${experience.price.toFixed(2)}</span>
+        <span className="text-muted-foreground">Event Price</span>
+        <div className="text-right">
+          {experience.flashDeal && experience.discountPercentage ? (
+            <>
+              <span className="line-through text-muted-foreground mr-2">${experience.price.toFixed(2)}</span>
+              <span>${displayPrice.toFixed(2)}</span>
+            </>
+          ) : (
+            <span>${displayPrice.toFixed(2)}</span>
+          )}
+        </div>
       </div>
       <div className="flex justify-between mb-2">
         <span className="text-muted-foreground">Service Fee</span>
-        <span>${(experience.price * 0.1).toFixed(2)}</span>
+        <span>${serviceFee.toFixed(2)}</span>
       </div>
       <div className="flex justify-between font-medium pt-2 border-t">
         <span>Total</span>
-        <span>${(experience.price * 1.1).toFixed(2)}</span>
+        <span>${totalPrice.toFixed(2)}</span>
       </div>
       
       <Button 
@@ -113,7 +127,7 @@ const PaymentForm = ({
         disabled={!stripe || isProcessing}
         className="w-full"
       >
-        {isProcessing ? "Processing..." : `Pay $${(experience.price * 1.1).toFixed(2)}`}
+        {isProcessing ? "Processing..." : `Pay $${totalPrice.toFixed(2)}`}
       </Button>
     </form>
   );
@@ -128,6 +142,11 @@ const BookingModalContent = ({ experience, onClose }: Omit<BookingModalProps, 'o
   const navigate = useNavigate();
   
   if (!experience) return null;
+
+  const startDate = new Date(experience.startDate);
+  const formattedDate = format(startDate, 'EEEE, MMMM d, yyyy');
+  const displayPrice = getDisplayPrice(experience);
+  const isFlashDeal = experience.flashDeal && experience.discountPercentage;
   
   const handleProceedToPayment = () => {
     if (!selectedTime) {
@@ -184,11 +203,27 @@ const BookingModalContent = ({ experience, onClose }: Omit<BookingModalProps, 'o
                   alt={experience.title}
                   className="w-full h-full object-cover"
                 />
+                {isFlashDeal && (
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-yellow-500 text-white">
+                      <Zap size={14} className="mr-1" /> {experience.discountPercentage}% Off
+                    </Badge>
+                  </div>
+                )}
               </div>
               
               <div className="flex justify-between items-start mt-3">
                 <h3 className="font-medium">{experience.title}</h3>
-                <span className="font-semibold">${experience.price}</span>
+                <div>
+                  {isFlashDeal ? (
+                    <div className="text-right">
+                      <span className="text-sm line-through text-muted-foreground">${experience.price}</span>
+                      <span className="font-semibold ml-2">${displayPrice}</span>
+                    </div>
+                  ) : (
+                    <span className="font-semibold">${displayPrice}</span>
+                  )}
+                </div>
               </div>
               
               <div className="flex items-center text-sm text-muted-foreground">
@@ -198,6 +233,16 @@ const BookingModalContent = ({ experience, onClose }: Omit<BookingModalProps, 'o
                 <Badge variant="outline" className="text-xs">
                   {experience.provider}
                 </Badge>
+              </div>
+
+              <div className="flex items-center text-sm text-muted-foreground mt-1">
+                <MapPin size={14} className="mr-1" />
+                {experience.location}, {experience.city}
+              </div>
+              
+              <div className="flex items-center text-sm font-medium mt-1">
+                <Calendar size={14} className="mr-1" />
+                {formattedDate}
               </div>
             </div>
             
@@ -212,7 +257,7 @@ const BookingModalContent = ({ experience, onClose }: Omit<BookingModalProps, 'o
                     className="justify-start"
                     onClick={() => setSelectedTime(time)}
                   >
-                    <Calendar className="mr-2 h-4 w-4" />
+                    <Clock className="mr-2 h-4 w-4" />
                     {time}
                   </Button>
                 ))}
@@ -245,16 +290,25 @@ const BookingModalContent = ({ experience, onClose }: Omit<BookingModalProps, 'o
             
             <div className="border-t pt-4">
               <div className="flex justify-between mb-2">
-                <span className="text-muted-foreground">Experience Price</span>
-                <span>${experience.price.toFixed(2)}</span>
+                <span className="text-muted-foreground">Event Price</span>
+                <div>
+                  {isFlashDeal ? (
+                    <>
+                      <span className="line-through text-muted-foreground mr-2">${experience.price.toFixed(2)}</span>
+                      <span>${displayPrice.toFixed(2)}</span>
+                    </>
+                  ) : (
+                    <span>${displayPrice.toFixed(2)}</span>
+                  )}
+                </div>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="text-muted-foreground">Service Fee</span>
-                <span>${(experience.price * 0.1).toFixed(2)}</span>
+                <span>${(displayPrice * 0.1).toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-medium pt-2 border-t">
                 <span>Total</span>
-                <span>${(experience.price * 1.1).toFixed(2)}</span>
+                <span>${(displayPrice * 1.1).toFixed(2)}</span>
               </div>
             </div>
             
@@ -274,7 +328,7 @@ const BookingModalContent = ({ experience, onClose }: Omit<BookingModalProps, 'o
             <div className="mb-4">
               <h3 className="font-medium mb-1">{experience.title}</h3>
               <p className="text-sm text-muted-foreground mb-2">
-                {experience.duration} • {selectedTime}
+                {formattedDate} • {selectedTime}
               </p>
               
               <PaymentForm 

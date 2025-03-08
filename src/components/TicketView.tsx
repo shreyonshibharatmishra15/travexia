@@ -3,9 +3,11 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, Calendar, MapPin, QrCode } from 'lucide-react';
-import { Experience } from '@/lib/data';
+import { Clock, Calendar, MapPin, QrCode, Share2, Download } from 'lucide-react';
+import { Experience, getDisplayPrice } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface TicketViewProps {
   experience: Experience;
