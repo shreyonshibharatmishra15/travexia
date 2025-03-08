@@ -38,10 +38,22 @@ const Header: React.FC = () => {
           to="/" 
           className="flex items-center space-x-2"
         >
-          <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center">
-            <span className="text-primary-foreground font-semibold text-lg">L</span>
+          <div className="h-9">
+            {/* Use a different logo based on background transparency */}
+            {!scrolled && isHomePage ? (
+              <img 
+                src="/lovable-uploads/86b5e75b-9b5e-487d-b550-8689ad665fca.png" 
+                alt="Travexia" 
+                className="h-7 md:h-9" 
+              />
+            ) : (
+              <img 
+                src="/lovable-uploads/db174c9e-c43b-4b6f-8c6e-4fe00d3500c3.png" 
+                alt="Travexia" 
+                className="h-7 md:h-9" 
+              />
+            )}
           </div>
-          <span className="font-medium text-lg tracking-tight">Local</span>
         </Link>
         
         <div className="flex items-center">
