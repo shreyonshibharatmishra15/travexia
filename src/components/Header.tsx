@@ -39,20 +39,12 @@ const Header: React.FC = () => {
           className="flex items-center space-x-2"
         >
           <div className="h-9">
-            {/* Use a different logo based on background transparency */}
-            {!scrolled && isHomePage ? (
-              <img 
-                src="/lovable-uploads/86b5e75b-9b5e-487d-b550-8689ad665fca.png" 
-                alt="Travexia" 
-                className="h-7 md:h-9" 
-              />
-            ) : (
-              <img 
-                src="/lovable-uploads/db174c9e-c43b-4b6f-8c6e-4fe00d3500c3.png" 
-                alt="Travexia" 
-                className="h-7 md:h-9" 
-              />
-            )}
+            {/* Always use the dark logo (black text) regardless of background */}
+            <img 
+              src="/lovable-uploads/db174c9e-c43b-4b6f-8c6e-4fe00d3500c3.png" 
+              alt="Travexia" 
+              className="h-7 md:h-9" 
+            />
           </div>
         </Link>
         
