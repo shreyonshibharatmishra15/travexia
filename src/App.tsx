@@ -9,6 +9,7 @@ import Explore from "./pages/Explore";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Tickets from "./pages/Tickets";
 import Profile from "./pages/Profile";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/booking-confirmation/:id" element={<BookingConfirmation />} />
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/about" element={<About />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

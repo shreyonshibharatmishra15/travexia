@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import OnboardingFlow from '@/components/OnboardingFlow';
@@ -17,7 +16,6 @@ const Index = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const navigate = useNavigate();
   
-  // Check if this is the first visit
   useEffect(() => {
     const isFirstVisit = localStorage.getItem('hasVisited') !== 'true';
     setShowOnboarding(isFirstVisit);
@@ -42,7 +40,6 @@ const Index = () => {
       <Header />
       
       <main className="min-h-screen pt-16">
-        {/* Hero Section */}
         <section className="relative h-[85vh] mb-12 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/70 z-10" />
           <img 
@@ -72,7 +69,6 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Today's Experiences */}
         <section className="container px-4 md:px-6 mb-16">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -98,7 +94,6 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Recommended Experiences */}
         <section className="container px-4 md:px-6 mb-16">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -127,7 +122,6 @@ const Index = () => {
           </div>
         </section>
         
-        {/* App Features Section */}
         <section className="bg-secondary/50 py-16">
           <div className="container px-4 md:px-6">
             <h2 className="text-2xl font-semibold text-center mb-12">How It Works</h2>
@@ -167,19 +161,21 @@ const Index = () => {
         </section>
       </main>
       
-      {/* Footer */}
       <footer className="bg-background border-t py-8">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-semibold text-sm">L</span>
-              </div>
-              <span className="ml-2 font-medium">Local</span>
+              <img 
+                src="/lovable-uploads/db174c9e-c43b-4b6f-8c6e-4fe00d3500c3.png" 
+                alt="Travexia" 
+                className="h-8" 
+              />
             </div>
             
             <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
-              <Button variant="link" size="sm">About</Button>
+              <Button variant="link" size="sm" asChild>
+                <a href="/about">About</a>
+              </Button>
               <Button variant="link" size="sm">FAQ</Button>
               <Button variant="link" size="sm">Support</Button>
               <Button variant="link" size="sm">Privacy Policy</Button>
@@ -187,17 +183,15 @@ const Index = () => {
           </div>
           
           <div className="mt-8 pt-4 border-t text-center text-sm text-muted-foreground">
-            © 2023 Local. All rights reserved. Focused on Kitchener-Waterloo region.
+            © 2023 Travexia. All rights reserved. Focused on Kitchener-Waterloo region.
           </div>
         </div>
       </footer>
       
-      {/* Onboarding */}
       {showOnboarding && (
         <OnboardingFlow onComplete={handleOnboardingComplete} />
       )}
       
-      {/* Booking Modal */}
       <BookingModal
         experience={selectedExperience}
         open={showBookingModal}
