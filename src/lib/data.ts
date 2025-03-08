@@ -1,6 +1,4 @@
 
-import { StaticImageData } from 'next/image';
-
 export type Experience = {
   id: string;
   title: string;
