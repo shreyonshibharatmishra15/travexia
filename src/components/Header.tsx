@@ -39,7 +39,7 @@ const Header: React.FC = () => {
           className="flex items-center space-x-2"
         >
           <div className="h-9">
-            {/* Always use the dark logo (black text) regardless of background */}
+            {/* Using consistent logo throughout the application */}
             <img 
               src="/lovable-uploads/db174c9e-c43b-4b6f-8c6e-4fe00d3500c3.png" 
               alt="Travexia" 
