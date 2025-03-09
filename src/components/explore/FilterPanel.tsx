@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from "@/components/ui/slider";
@@ -8,7 +7,6 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Calendar, Globe, Compass, Accessibility, Sparkles, Gem, Zap } from 'lucide-react';
 import InterestSelection from '@/components/InterestSelection';
-import { AccessibilityFeatures } from '@/lib/data';
 
 interface FilterPanelProps {
   selectedInterests: string[];
@@ -26,7 +24,11 @@ interface FilterPanelProps {
   activityTypes: string[];
   selectedActivityTypes: string[];
   toggleActivityType: (type: string) => void;
-  accessibilityFeatures: AccessibilityFeatures;
+  accessibilityFeatures: {
+    mobility: string[];
+    communication: string[];
+    sensory: string[];
+  };
   selectedAccessibility: {
     mobility: string[];
     communication: string[];
