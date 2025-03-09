@@ -1,17 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
-import ExperienceCard from '@/components/ExperienceCard';
 import BookingModal from '@/components/BookingModal';
-import InterestSelection from '@/components/InterestSelection';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useLocation } from '@/components/LocationContext'; 
 import { 
   experiences, 
@@ -26,8 +16,15 @@ import {
   getAllActivityTypes,
   getAllAccessibilityFeatures
 } from '@/lib/data';
-import { Search, Filter, X, Sparkles, Gem, Zap, Clock, ArrowDownUp, Calendar, Globe, Compass, Accessibility, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
+
+// Import our new components
+import SearchBar from '@/components/explore/SearchBar';
+import FilterToggle from '@/components/explore/FilterToggle';
+import SortOptions from '@/components/explore/SortOptions';
+import FilterPanel from '@/components/explore/FilterPanel';
+import LocationIndicator from '@/components/explore/LocationIndicator';
+import TabsWrapper from '@/components/explore/TabsWrapper';
 
 const Explore = () => {
   const { currentLocation } = useLocation();
@@ -62,6 +59,7 @@ const Explore = () => {
     freeForAssistants: false
   });
   
+  // Notification refresh effect
   useEffect(() => {
     const interval = setInterval(() => {
       toast.info("Event listings refreshed", {
@@ -72,6 +70,7 @@ const Explore = () => {
     return () => clearInterval(interval);
   }, []);
   
+  // Location change effect
   useEffect(() => {
     setSelectedCities([]);
     setTimeFrame('all');
@@ -83,20 +82,27 @@ const Explore = () => {
       description: "Discover local authentic experiences"
     });
     
-    const personalized = getPersonalizedExperiences(selectedInterests, currentLocation);
-    setPersonalizedExperiences(personalized);
+    updatePersonalizedExperiences(selectedInterests, currentLocation);
   }, [currentLocation]);
   
+  const updatePersonalizedExperiences = (interests: string[], location: string) => {
+    const personalized = getPersonalizedExperiences(interests, location);
+    setPersonalizedExperiences(personalized);
+  };
+  
+  // Get data for filters
   const cities = getAllCities();
   const languages = getAllLanguages();
   const activityTypes = getAllActivityTypes();
   const accessibilityFeatures = getAllAccessibilityFeatures();
   
+  // Handle experience selection
   const handleExperienceClick = (experience: Experience) => {
     setSelectedExperience(experience);
     setShowBookingModal(true);
   };
   
+  // Filter toggle handlers
   const toggleCity = (city: string) => {
     if (selectedCities.includes(city)) {
       setSelectedCities(selectedCities.filter(c => c !== city));
@@ -152,6 +158,7 @@ const Explore = () => {
     });
   };
   
+  // Filter and sort experiences
   let filteredExperiences = filterExperiences(
     selectedInterests,
     timeFrame,
@@ -170,6 +177,7 @@ const Explore = () => {
     currentLocation
   );
   
+  // Apply search filter
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
     filteredExperiences = filteredExperiences.filter(exp => 
@@ -182,6 +190,7 @@ const Explore = () => {
     );
   }
   
+  // Apply sorting
   filteredExperiences = [...filteredExperiences].sort((a, b) => {
     switch(sortOption) {
       case 'price-asc':
@@ -197,12 +206,35 @@ const Explore = () => {
     }
   });
   
+  // Get specialized collections of experiences
   const trendingExperiences = getTrendingExperiences();
   const hiddenGemExperiences = getHiddenGemExperiences();
   const flashDealExperiences = getFlashDealExperiences();
   
   const hasExperiences = experiences.length > 0;
   
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSelectedInterests([]);
+    setSelectedCities([]);
+    setMaxPrice(100);
+    setShowOnlyTrending(false);
+    setShowOnlyHiddenGems(false);
+    setShowOnlyFlashDeals(false);
+    setTimeFrame('all');
+    setSelectedTimeOfDay([]);
+    setSelectedLanguages([]);
+    setSelectedActivityTypes([]);
+    setSelectedAccessibility({
+      mobility: [],
+      communication: [],
+      sensory: [],
+      freeForAssistants: false
+    });
+    setSearchQuery('');
+  };
+  
+  // Count active filters for the badge
   const countActiveFilters = () => {
     return selectedInterests.length + 
            selectedCities.length + 
@@ -229,554 +261,76 @@ const Explore = () => {
       <main className="min-h-screen pt-20 pb-16">
         <div className="container px-4 md:px-6">
           <div className="mb-8">
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search events, categories, locations..."
-                className="w-full bg-background border rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  onClick={() => setSearchQuery('')}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
+            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MapPin size={16} className="text-primary" />
-                <span className="text-sm font-medium">Showing experiences in {currentLocation}</span>
-              </div>
-            </div>
+            <LocationIndicator currentLocation={currentLocation} />
             
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <Filter size={16} />
-                Filters
-                {activeFiltersCount > 0 && (
-                  <span className="ml-1 bg-primary text-primary-foreground w-5 h-5 rounded-full text-xs flex items-center justify-center">
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </Button>
+              <FilterToggle 
+                showFilters={showFilters} 
+                setShowFilters={setShowFilters} 
+                activeFiltersCount={activeFiltersCount} 
+              />
               
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    id="today-only"
-                    checked={timeFrame === 'today'} 
-                    onCheckedChange={(checked) => setTimeFrame(checked ? 'today' : 'all')}
-                  />
-                  <Label htmlFor="today-only" className="text-sm cursor-pointer">Today only</Label>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1 text-xs"
-                    onClick={() => setSortOption('time-asc')}
-                  >
-                    <Clock size={14} />
-                    Soonest
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1 text-xs"
-                    onClick={() => setSortOption(sortOption === 'price-asc' ? 'price-desc' : 'price-asc')}
-                  >
-                    <ArrowDownUp size={14} />
-                    Price
-                  </Button>
-                </div>
-              </div>
+              <SortOptions 
+                timeFrame={timeFrame} 
+                setTimeFrame={setTimeFrame} 
+                setSortOption={setSortOption} 
+                sortOption={sortOption} 
+              />
             </div>
             
             {showFilters && (
-              <div className="mt-4 p-4 bg-background border rounded-lg animate-scale-in">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="font-medium mb-4">Filter by interest</h3>
-                      <InterestSelection
-                        selectedInterests={selectedInterests}
-                        onChange={setSelectedInterests}
-                        compact
-                      />
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-4">Filter by location</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {cities.map(city => (
-                          <Badge 
-                            key={city}
-                            variant={selectedCities.includes(city) ? "default" : "outline"}
-                            className="cursor-pointer"
-                            onClick={() => toggleCity(city)}
-                          >
-                            {city}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-4">Price range</h3>
-                      <div className="px-2">
-                        <Slider
-                          defaultValue={[maxPrice]}
-                          max={150}
-                          step={5}
-                          onValueChange={(value) => setMaxPrice(value[0])}
-                        />
-                        <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                          <span>$0</span>
-                          <span>Up to ${maxPrice}</span>
-                          <span>$150+</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-4 flex items-center gap-2">
-                        <Calendar size={16} />
-                        Time of day
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="morning"
-                            checked={selectedTimeOfDay.includes('morning')}
-                            onCheckedChange={() => toggleTimeOfDay('morning')}
-                          />
-                          <Label htmlFor="morning" className="text-sm">
-                            Morning (before 12 PM)
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="afternoon"
-                            checked={selectedTimeOfDay.includes('afternoon')}
-                            onCheckedChange={() => toggleTimeOfDay('afternoon')}
-                          />
-                          <Label htmlFor="afternoon" className="text-sm">
-                            Afternoon (12 PM - 5 PM)
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="evening"
-                            checked={selectedTimeOfDay.includes('evening')}
-                            onCheckedChange={() => toggleTimeOfDay('evening')}
-                          />
-                          <Label htmlFor="evening" className="text-sm">
-                            Evening (after 5 PM)
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-4 flex items-center gap-2">
-                        <Globe size={16} />
-                        Languages available
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {languages.map(language => (
-                          <Badge 
-                            key={language}
-                            variant={selectedLanguages.includes(language) ? "default" : "outline"}
-                            className="cursor-pointer"
-                            onClick={() => toggleLanguage(language)}
-                          >
-                            {language}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mt-6 mb-4">Special categories</h3>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            id="trending-only"
-                            checked={showOnlyTrending} 
-                            onCheckedChange={setShowOnlyTrending}
-                          />
-                          <Label htmlFor="trending-only" className="text-sm cursor-pointer flex items-center">
-                            <Sparkles size={14} className="mr-1 text-pink-500" />
-                            Trending experiences
-                          </Label>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            id="hidden-gems-only"
-                            checked={showOnlyHiddenGems} 
-                            onCheckedChange={setShowOnlyHiddenGems}
-                          />
-                          <Label htmlFor="hidden-gems-only" className="text-sm cursor-pointer flex items-center">
-                            <Gem size={14} className="mr-1 text-purple-500" />
-                            Hidden gems
-                          </Label>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Switch 
-                            id="flash-deals-only"
-                            checked={showOnlyFlashDeals} 
-                            onCheckedChange={setShowOnlyFlashDeals}
-                          />
-                          <Label htmlFor="flash-deals-only" className="text-sm cursor-pointer flex items-center">
-                            <Zap size={14} className="mr-1 text-yellow-500" />
-                            Flash deals
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="font-medium mb-4 flex items-center gap-2">
-                        <Compass size={16} />
-                        Activity type
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {activityTypes.map(type => (
-                          <div key={type} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`activity-${type.toLowerCase().replace(/\s+/g, '-')}`}
-                              checked={selectedActivityTypes.includes(type)}
-                              onCheckedChange={() => toggleActivityType(type)}
-                            />
-                            <Label 
-                              htmlFor={`activity-${type.toLowerCase().replace(/\s+/g, '-')}`} 
-                              className="text-sm"
-                            >
-                              {type}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-medium mb-4 flex items-center gap-2">
-                        <Accessibility size={16} />
-                        Accessibility features
-                      </h3>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Mobility</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {accessibilityFeatures.mobility.map(feature => (
-                              <div key={feature} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`mobility-${feature.toLowerCase().replace(/\s+/g, '-')}`}
-                                  checked={selectedAccessibility.mobility.includes(feature)}
-                                  onCheckedChange={() => toggleAccessibilityFeature('mobility', feature)}
-                                />
-                                <Label 
-                                  htmlFor={`mobility-${feature.toLowerCase().replace(/\s+/g, '-')}`} 
-                                  className="text-sm"
-                                >
-                                  {feature}
-                                </Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Communication</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {accessibilityFeatures.communication.map(feature => (
-                              <div key={feature} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`communication-${feature.toLowerCase().replace(/\s+/g, '-')}`}
-                                  checked={selectedAccessibility.communication.includes(feature)}
-                                  onCheckedChange={() => toggleAccessibilityFeature('communication', feature)}
-                                />
-                                <Label 
-                                  htmlFor={`communication-${feature.toLowerCase().replace(/\s+/g, '-')}`} 
-                                  className="text-sm"
-                                >
-                                  {feature}
-                                </Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Sensory</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {accessibilityFeatures.sensory.map(feature => (
-                              <div key={feature} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`sensory-${feature.toLowerCase().replace(/\s+/g, '-')}`}
-                                  checked={selectedAccessibility.sensory.includes(feature)}
-                                  onCheckedChange={() => toggleAccessibilityFeature('sensory', feature)}
-                                />
-                                <Label 
-                                  htmlFor={`sensory-${feature.toLowerCase().replace(/\s+/g, '-')}`} 
-                                  className="text-sm"
-                                >
-                                  {feature}
-                                </Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 pt-2">
-                          <Checkbox 
-                            id="free-for-assistants"
-                            checked={selectedAccessibility.freeForAssistants}
-                            onCheckedChange={toggleFreeForAssistants}
-                          />
-                          <Label htmlFor="free-for-assistants" className="text-sm">
-                            Free admission for people assisting guests with disabilities
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {activeFiltersCount > 0 && (
-                  <div className="mt-4 flex justify-end">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedInterests([]);
-                        setSelectedCities([]);
-                        setMaxPrice(100);
-                        setShowOnlyTrending(false);
-                        setShowOnlyHiddenGems(false);
-                        setShowOnlyFlashDeals(false);
-                        setTimeFrame('all');
-                        setSelectedTimeOfDay([]);
-                        setSelectedLanguages([]);
-                        setSelectedActivityTypes([]);
-                        setSelectedAccessibility({
-                          mobility: [],
-                          communication: [],
-                          sensory: [],
-                          freeForAssistants: false
-                        });
-                      }}
-                    >
-                      Clear all filters
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <FilterPanel 
+                selectedInterests={selectedInterests}
+                setSelectedInterests={setSelectedInterests}
+                cities={cities}
+                selectedCities={selectedCities}
+                toggleCity={toggleCity}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+                selectedTimeOfDay={selectedTimeOfDay}
+                toggleTimeOfDay={toggleTimeOfDay}
+                languages={languages}
+                selectedLanguages={selectedLanguages}
+                toggleLanguage={toggleLanguage}
+                activityTypes={activityTypes}
+                selectedActivityTypes={selectedActivityTypes}
+                toggleActivityType={toggleActivityType}
+                accessibilityFeatures={accessibilityFeatures}
+                selectedAccessibility={selectedAccessibility}
+                toggleAccessibilityFeature={toggleAccessibilityFeature}
+                toggleFreeForAssistants={toggleFreeForAssistants}
+                showOnlyTrending={showOnlyTrending}
+                setShowOnlyTrending={setShowOnlyTrending}
+                showOnlyHiddenGems={showOnlyHiddenGems}
+                setShowOnlyHiddenGems={setShowOnlyHiddenGems}
+                showOnlyFlashDeals={showOnlyFlashDeals}
+                setShowOnlyFlashDeals={setShowOnlyFlashDeals}
+                clearAllFilters={clearAllFilters}
+                activeFiltersCount={activeFiltersCount}
+              />
             )}
           </div>
           
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-            <TabsList className="w-full justify-start overflow-x-auto">
-              <TabsTrigger value="all">All Events</TabsTrigger>
-              <TabsTrigger value="personalized" className="flex items-center gap-1">
-                <Sparkles size={14} />
-                For You
-              </TabsTrigger>
-              <TabsTrigger value="trending" className="flex items-center gap-1">
-                <Sparkles size={14} />
-                Trending
-              </TabsTrigger>
-              <TabsTrigger value="hidden-gems" className="flex items-center gap-1">
-                <Gem size={14} />
-                Hidden Gems
-              </TabsTrigger>
-              <TabsTrigger value="flash-deals" className="flex items-center gap-1">
-                <Zap size={14} />
-                Flash Deals
-              </TabsTrigger>
-            </TabsList>
-          
-            <div className="mb-6 mt-4">
-              <h1 className="text-2xl font-bold mb-2">
-                {activeTab === 'all' && 'Explore Events'}
-                {activeTab === 'personalized' && 'Recommended For You'}
-                {activeTab === 'trending' && 'Trending Events'}
-                {activeTab === 'hidden-gems' && 'Hidden Gems'}
-                {activeTab === 'flash-deals' && 'Flash Deals'}
-              </h1>
-              <p className="text-muted-foreground">
-                {activeTab === 'all' && `${filteredExperiences.length} events in ${currentLocation}`}
-                {activeTab === 'personalized' && `${personalizedExperiences.length} events tailored to your interests`}
-                {activeTab === 'trending' && `${trendingExperiences.length} events everyone's talking about`}
-                {activeTab === 'hidden-gems' && `${hiddenGemExperiences.length} unique experiences you might have missed`}
-                {activeTab === 'flash-deals' && `${flashDealExperiences.length} limited-time deals available now`}
-                {timeFrame === 'today' && ' happening today'}
-                {timeFrame === 'next48hours' && ' in the next 48 hours'}
-              </p>
-            </div>
-          
-            {hasExperiences && (
-              <>
-                <TabsContent value="all">
-                  {filteredExperiences.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredExperiences.map((exp) => (
-                        <ExperienceCard 
-                          key={exp.id}
-                          experience={exp}
-                          onClick={handleExperienceClick}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-16">
-                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                        <Search className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <h3 className="text-lg font-medium mb-2">No events found</h3>
-                      <p className="text-muted-foreground text-center max-w-md mb-6">
-                        Try adjusting your filters or search query to find events that match your preferences.
-                      </p>
-                      <Button onClick={() => {
-                        setSelectedInterests([]);
-                        setSelectedCities([]);
-                        setTimeFrame('all');
-                        setSearchQuery('');
-                        setMaxPrice(100);
-                        setShowOnlyTrending(false);
-                        setShowOnlyHiddenGems(false);
-                        setShowOnlyFlashDeals(false);
-                        setSelectedTimeOfDay([]);
-                        setSelectedLanguages([]);
-                        setSelectedActivityTypes([]);
-                        setSelectedAccessibility({
-                          mobility: [],
-                          communication: [],
-                          sensory: [],
-                          freeForAssistants: false
-                        });
-                      }}>
-                        Clear all filters
-                      </Button>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="personalized">
-                  {personalizedExperiences.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {personalizedExperiences.map((exp) => (
-                        <ExperienceCard 
-                          key={exp.id}
-                          experience={exp}
-                          onClick={handleExperienceClick}
-                          featured={true}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-16">
-                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                        <Sparkles className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <h3 className="text-lg font-medium mb-2">Tell us what you like</h3>
-                      <p className="text-muted-foreground text-center max-w-md mb-6">
-                        Select some interests to help us personalize your experience recommendations.
-                      </p>
-                      <div className="w-full max-w-2xl">
-                        <InterestSelection
-                          selectedInterests={selectedInterests}
-                          onChange={(interests) => {
-                            setSelectedInterests(interests);
-                            const personalized = getPersonalizedExperiences(interests, currentLocation);
-                            setPersonalizedExperiences(personalized);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="trending">
-                  {trendingExperiences.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {trendingExperiences.map((exp) => (
-                        <ExperienceCard 
-                          key={exp.id}
-                          experience={exp}
-                          onClick={handleExperienceClick}
-                          featured={true}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-16">
-                      <p className="text-muted-foreground text-center">
-                        No trending events available at the moment. Check back soon!
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="hidden-gems">
-                  {hiddenGemExperiences.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {hiddenGemExperiences.map((exp) => (
-                        <ExperienceCard 
-                          key={exp.id}
-                          experience={exp}
-                          onClick={handleExperienceClick}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-16">
-                      <p className="text-muted-foreground text-center">
-                        No hidden gem events available at the moment. Check back soon!
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="flash-deals">
-                  {flashDealExperiences.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {flashDealExperiences.map((exp) => (
-                        <ExperienceCard 
-                          key={exp.id}
-                          experience={exp}
-                          onClick={handleExperienceClick}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-16">
-                      <p className="text-muted-foreground text-center">
-                        No flash deals available at the moment. Check back soon!
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-              </>
-            )}
-          </Tabs>
+          {hasExperiences && (
+            <TabsWrapper 
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              filteredExperiences={filteredExperiences}
+              personalizedExperiences={personalizedExperiences}
+              trendingExperiences={trendingExperiences}
+              hiddenGemExperiences={hiddenGemExperiences}
+              flashDealExperiences={flashDealExperiences}
+              currentLocation={currentLocation}
+              timeFrame={timeFrame}
+              handleExperienceClick={handleExperienceClick}
+              selectedInterests={selectedInterests}
+              setSelectedInterests={setSelectedInterests}
+              updatePersonalizedExperiences={updatePersonalizedExperiences}
+              clearAllFilters={clearAllFilters}
+            />
+          )}
         </div>
       </main>
       
@@ -790,4 +344,3 @@ const Explore = () => {
 };
 
 export default Explore;
-
