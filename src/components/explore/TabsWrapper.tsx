@@ -63,14 +63,14 @@ const TabsWrapper = ({
     
       <div className="mb-6 mt-4">
         <h1 className="text-2xl font-bold mb-2">
-          {activeTab === 'all' && 'Explore Events'}
+          {activeTab === 'all' && `Events in ${currentLocation}`}
           {activeTab === 'personalized' && 'Recommended For You'}
           {activeTab === 'trending' && 'Trending Events'}
           {activeTab === 'hidden-gems' && 'Hidden Gems'}
           {activeTab === 'flash-deals' && 'Flash Deals'}
         </h1>
         <p className="text-muted-foreground">
-          {activeTab === 'all' && `${filteredExperiences.length} events in ${currentLocation}`}
+          {activeTab === 'all' && `${filteredExperiences.length} events to explore in ${currentLocation}`}
           {activeTab === 'personalized' && `${personalizedExperiences.length} events tailored to your interests`}
           {activeTab === 'trending' && `${trendingExperiences.length} events everyone's talking about`}
           {activeTab === 'hidden-gems' && `${hiddenGemExperiences.length} unique experiences you might have missed`}
@@ -83,7 +83,6 @@ const TabsWrapper = ({
       <TabsContent value="all">
         <ExperienceList 
           experiences={filteredExperiences}
-
           handleExperienceClick={handleExperienceClick}
           activeTab={activeTab}
           clearFilters={clearAllFilters}
@@ -131,7 +130,7 @@ const TabsWrapper = ({
         ) : (
           <div className="flex flex-col items-center justify-center py-16">
             <p className="text-muted-foreground text-center">
-              No trending events available at the moment. Check back soon!
+              No trending events available in {currentLocation} at the moment. Check back soon!
             </p>
           </div>
         )}
@@ -148,7 +147,7 @@ const TabsWrapper = ({
         ) : (
           <div className="flex flex-col items-center justify-center py-16">
             <p className="text-muted-foreground text-center">
-              No hidden gem events available at the moment. Check back soon!
+              No hidden gem events available in {currentLocation} at the moment. Check back soon!
             </p>
           </div>
         )}
@@ -165,7 +164,7 @@ const TabsWrapper = ({
         ) : (
           <div className="flex flex-col items-center justify-center py-16">
             <p className="text-muted-foreground text-center">
-              No flash deals available at the moment. Check back soon!
+              No flash deals available in {currentLocation} at the moment. Check back soon!
             </p>
           </div>
         )}
