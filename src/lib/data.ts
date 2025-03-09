@@ -1,3 +1,4 @@
+<lov-code>
 export type Experience = {
   id: string;
   title: string;
@@ -32,6 +33,7 @@ export type Experience = {
     freeForAssistants?: boolean;
   };
   aiRecommendationScore?: number;
+  source?: 'local' | 'viator' | 'getyourguide' | 'fever';
 };
 
 export type Interest = {
@@ -59,7 +61,7 @@ const getISODateInHours = (hoursFromNow: number): string => {
   return date.toISOString();
 };
 
-export const experiences: Experience[] = [
+export const experiencesData: Experience[] = [
   {
     id: '1',
     title: 'Waterloo Farmers\' Market Food Tour',
@@ -558,7 +560,7 @@ export function filterExperiences(
   },
   location?: string
 ): Experience[] {
-  return experiences.filter(exp => {
+  return combinedExperiences.filter(exp => {
     const matchesInterests = selectedInterests.length === 0 || 
       exp.categories.some(category => selectedInterests.includes(category));
     
@@ -637,20 +639,20 @@ export function filterExperiences(
 }
 
 export function getExperienceById(id: string): Experience | undefined {
-  return experiences.find(exp => exp.id === id);
+  return combinedExperiences.find(exp => exp.id === id);
 }
 
 export function getTrendingExperiences(): Experience[] {
-  return experiences.filter(exp => exp.trending && isAvailableWithin48Hours(exp));
+  return combinedExperiences.filter(exp => exp.trending && isAvailableWithin48Hours(exp));
 }
 
 export function getHiddenGemExperiences(): Experience[] {
-  return experiences.filter(exp => exp.hiddenGem && isAvailableWithin48Hours(exp));
+  return combinedExperiences.filter(exp => exp.hiddenGem && isAvailableWithin48Hours(exp));
 }
 
 export function getFlashDealExperiences(): Experience[] {
   const now = new Date();
-  return experiences.filter(exp => {
+  return combinedExperiences.filter(exp => {
     if (!exp.flashDeal || !exp.flashDealEndTime) return false;
     const dealEnd = new Date(exp.flashDealEndTime);
     return dealEnd > now && isAvailableWithin48Hours(exp);
@@ -658,7 +660,7 @@ export function getFlashDealExperiences(): Experience[] {
 }
 
 export function getAllCities(): string[] {
-  return Array.from(new Set(experiences.map(exp => exp.city)));
+  return Array.from(new Set(combinedExperiences.map(exp => exp.city)));
 }
 
 export function getDisplayPrice(experience: Experience): number {
@@ -678,7 +680,7 @@ export function getTimeOfDay(date: Date): 'morning' | 'afternoon' | 'evening' {
 
 export function getAllLanguages(): string[] {
   const allLanguages = new Set<string>();
-  experiences.forEach(exp => {
+  combinedExperiences.forEach(exp => {
     if (exp.languages) {
       exp.languages.forEach(lang => allLanguages.add(lang));
     }
@@ -688,7 +690,7 @@ export function getAllLanguages(): string[] {
 
 export function getAllActivityTypes(): string[] {
   const allTypes = new Set<string>();
-  experiences.forEach(exp => {
+  combinedExperiences.forEach(exp => {
     if (exp.activityType) {
       exp.activityType.forEach(type => allTypes.add(type));
     }
@@ -705,7 +707,7 @@ export function getAllAccessibilityFeatures(): {
   const communication = new Set<string>();
   const sensory = new Set<string>();
   
-  experiences.forEach(exp => {
+  combinedExperiences.forEach(exp => {
     if (exp.accessibilityFeatures) {
       if (exp.accessibilityFeatures.mobility) {
         exp.accessibilityFeatures.mobility.forEach(feature => mobility.add(feature));
@@ -727,7 +729,7 @@ export function getAllAccessibilityFeatures(): {
 }
 
 export function getPersonalizedExperiences(userInterests: string[], location: string): Experience[] {
-  return experiences
+  return combinedExperiences
     .filter(exp => {
       const matchesLocation = !location || 
                              exp.city === location;
@@ -747,7 +749,7 @@ export function getPersonalizedExperiences(userInterests: string[], location: st
 
 export function getAllRegions(): string[] {
   const regions = new Set<string>();
-  experiences.forEach(exp => {
+  combinedExperiences.forEach(exp => {
     if (exp.region) {
       regions.add(exp.region);
     }
@@ -757,7 +759,7 @@ export function getAllRegions(): string[] {
 
 export function getAllCountries(): string[] {
   const countries = new Set<string>();
-  experiences.forEach(exp => {
+  combinedExperiences.forEach(exp => {
     if (exp.country) {
       countries.add(exp.country);
     }
@@ -768,7 +770,7 @@ export function getAllCountries(): string[] {
 export function getCitiesByRegionOrCountry(region?: string, country?: string): string[] {
   return Array.from(
     new Set(
-      experiences
+      combinedExperiences
         .filter(exp => 
           (!region || exp.region === region) && 
           (!country || exp.country === country)
@@ -777,3 +779,12 @@ export function getCitiesByRegionOrCountry(region?: string, country?: string): s
     )
   );
 }
+
+// Mark existing experiences as local source
+const localExperiences: Experience[] = experiencesData.map(exp => ({
+  ...exp,
+  source: 'local' as const
+}));
+
+// Create a state variable to store combined experiences
+let combinedExperiences: Experience[] = [...localExperiences];

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import BookingModal from '@/components/BookingModal';
@@ -14,20 +13,14 @@ import {
   getPersonalizedExperiences,
   getAllLanguages,
   getAllActivityTypes,
-  getAllAccessibilityFeatures
+  getAllAccessibilityFeatures,
+  refreshExperiences
 } from '@/lib/data';
 import { toast } from 'sonner';
 
-// Import our new components
-import SearchBar from '@/components/explore/SearchBar';
-import FilterToggle from '@/components/explore/FilterToggle';
-import SortOptions from '@/components/explore/SortOptions';
-import FilterPanel from '@/components/explore/FilterPanel';
-import LocationIndicator from '@/components/explore/LocationIndicator';
-import TabsWrapper from '@/components/explore/TabsWrapper';
-
 const Explore = () => {
   const { currentLocation } = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
   const [personalizedExperiences, setPersonalizedExperiences] = useState<Experience[]>([]);
   
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -59,7 +52,6 @@ const Explore = () => {
     freeForAssistants: false
   });
   
-  // Notification refresh effect
   useEffect(() => {
     const interval = setInterval(() => {
       toast.info("Event listings refreshed", {
@@ -70,19 +62,35 @@ const Explore = () => {
     return () => clearInterval(interval);
   }, []);
   
-  // Location change effect
   useEffect(() => {
-    setSelectedCities([]);
-    setTimeFrame('all');
-    setShowOnlyTrending(false);
-    setShowOnlyHiddenGems(false);
-    setShowOnlyFlashDeals(false);
+    const fetchExternalExperiences = async () => {
+      if (!currentLocation) return;
+      
+      setIsLoading(true);
+      try {
+        await refreshExperiences(currentLocation);
+        toast.info(`Showing experiences in ${currentLocation}`, {
+          description: "Discover local authentic experiences"
+        });
+        
+        setSelectedCities([]);
+        setTimeFrame('all');
+        setShowOnlyTrending(false);
+        setShowOnlyHiddenGems(false);
+        setShowOnlyFlashDeals(false);
+        
+        updatePersonalizedExperiences(selectedInterests, currentLocation);
+      } catch (error) {
+        console.error("Error fetching experiences:", error);
+        toast.error("Failed to load experiences", {
+          description: "Please try again later"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    toast.info(`Showing experiences in ${currentLocation}`, {
-      description: "Discover local authentic experiences"
-    });
-    
-    updatePersonalizedExperiences(selectedInterests, currentLocation);
+    fetchExternalExperiences();
   }, [currentLocation]);
   
   const updatePersonalizedExperiences = (interests: string[], location: string) => {
@@ -90,19 +98,16 @@ const Explore = () => {
     setPersonalizedExperiences(personalized);
   };
   
-  // Get data for filters
   const cities = getAllCities();
   const languages = getAllLanguages();
   const activityTypes = getAllActivityTypes();
   const accessibilityFeatures = getAllAccessibilityFeatures();
   
-  // Handle experience selection
   const handleExperienceClick = (experience: Experience) => {
     setSelectedExperience(experience);
     setShowBookingModal(true);
   };
   
-  // Filter toggle handlers
   const toggleCity = (city: string) => {
     if (selectedCities.includes(city)) {
       setSelectedCities(selectedCities.filter(c => c !== city));
@@ -158,7 +163,6 @@ const Explore = () => {
     });
   };
   
-  // Filter and sort experiences
   let filteredExperiences = filterExperiences(
     selectedInterests,
     timeFrame,
@@ -177,7 +181,6 @@ const Explore = () => {
     currentLocation
   );
   
-  // Apply search filter
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
     filteredExperiences = filteredExperiences.filter(exp => 
@@ -190,7 +193,6 @@ const Explore = () => {
     );
   }
   
-  // Apply sorting
   filteredExperiences = [...filteredExperiences].sort((a, b) => {
     switch(sortOption) {
       case 'price-asc':
@@ -206,14 +208,12 @@ const Explore = () => {
     }
   });
   
-  // Get specialized collections of experiences
   const trendingExperiences = getTrendingExperiences();
   const hiddenGemExperiences = getHiddenGemExperiences();
   const flashDealExperiences = getFlashDealExperiences();
   
   const hasExperiences = experiences.length > 0;
   
-  // Clear all filters
   const clearAllFilters = () => {
     setSelectedInterests([]);
     setSelectedCities([]);
@@ -234,7 +234,6 @@ const Explore = () => {
     setSearchQuery('');
   };
   
-  // Count active filters for the badge
   const countActiveFilters = () => {
     return selectedInterests.length + 
            selectedCities.length + 
@@ -254,6 +253,23 @@ const Explore = () => {
   
   const activeFiltersCount = countActiveFilters();
   
+  const handleRefreshExperiences = async () => {
+    setIsLoading(true);
+    try {
+      await refreshExperiences(currentLocation);
+      toast.success("Experiences refreshed", {
+        description: "Showing the latest events in your area"
+      });
+      updatePersonalizedExperiences(selectedInterests, currentLocation);
+    } catch (error) {
+      toast.error("Failed to refresh experiences", {
+        description: "Please try again later"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return (
     <>
       <Header />
@@ -261,7 +277,26 @@ const Explore = () => {
       <main className="min-h-screen pt-20 pb-16">
         <div className="container px-4 md:px-6">
           <div className="mb-8">
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            <div className="flex justify-between items-center mb-4">
+              <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+              <button 
+                onClick={handleRefreshExperiences}
+                disabled={isLoading}
+                className="ml-2 p-2 rounded-full bg-primary/10 hover:bg-primary/20 transition-colors"
+                title="Refresh experiences"
+              >
+                {isLoading ? (
+                  <div className="h-5 w-5 border-2 border-primary border-r-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                    <path d="M3 21v-5h5" />
+                  </svg>
+                )}
+              </button>
+            </div>
             
             <LocationIndicator currentLocation={currentLocation} />
             
@@ -313,7 +348,12 @@ const Explore = () => {
             )}
           </div>
           
-          {hasExperiences && (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="h-12 w-12 border-4 border-primary border-r-transparent rounded-full animate-spin mb-4" />
+              <p className="text-lg text-muted-foreground">Loading experiences from Viator, GetYourGuide, and Fever...</p>
+            </div>
+          ) : hasExperiences ? (
             <TabsWrapper 
               activeTab={activeTab}
               setActiveTab={setActiveTab}
@@ -330,6 +370,17 @@ const Explore = () => {
               updatePersonalizedExperiences={updatePersonalizedExperiences}
               clearAllFilters={clearAllFilters}
             />
+          ) : (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold mb-2">No experiences found</h2>
+              <p className="text-muted-foreground mb-6">Try changing your filters or location</p>
+              <button 
+                onClick={handleRefreshExperiences}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90 transition-colors"
+              >
+                Refresh Experiences
+              </button>
+            </div>
           )}
         </div>
       </main>
