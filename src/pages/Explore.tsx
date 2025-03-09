@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import ExperienceCard from '@/components/ExperienceCard';
@@ -13,6 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useLocation } from '@/components/LocationContext'; 
 import { 
   experiences, 
   filterExperiences, 
@@ -21,14 +21,18 @@ import {
   getTrendingExperiences,
   getHiddenGemExperiences,
   getFlashDealExperiences,
+  getPersonalizedExperiences,
   getAllLanguages,
   getAllActivityTypes,
   getAllAccessibilityFeatures
 } from '@/lib/data';
-import { Search, Filter, X, Sparkles, Gem, Zap, Clock, ArrowDownUp, Calendar, Globe, Compass, Accessibility } from 'lucide-react';
+import { Search, Filter, X, Sparkles, Gem, Zap, Clock, ArrowDownUp, Calendar, Globe, Compass, Accessibility, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Explore = () => {
+  const { currentLocation } = useLocation();
+  const [personalizedExperiences, setPersonalizedExperiences] = useState<Experience[]>([]);
+  
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [timeFrame, setTimeFrame] = useState<'today' | 'next48hours' | 'all'>('all');
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
@@ -43,7 +47,6 @@ const Explore = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [sortOption, setSortOption] = useState<'price-asc' | 'price-desc' | 'rating-desc' | 'time-asc'>('time-asc');
   
-  // New state for additional filters
   const [selectedTimeOfDay, setSelectedTimeOfDay] = useState<('morning' | 'afternoon' | 'evening')[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedActivityTypes, setSelectedActivityTypes] = useState<string[]>([]);
@@ -59,10 +62,8 @@ const Explore = () => {
     freeForAssistants: false
   });
   
-  // Auto refresh the listings every hour
   useEffect(() => {
     const interval = setInterval(() => {
-      // This would normally fetch fresh data from the server
       toast.info("Event listings refreshed", {
         description: "Showing the latest events in your area"
       });
@@ -71,14 +72,20 @@ const Explore = () => {
     return () => clearInterval(interval);
   }, []);
   
-  // Ensure that we're showing all events on page load
   useEffect(() => {
-    setTimeFrame('all');
     setSelectedCities([]);
+    setTimeFrame('all');
     setShowOnlyTrending(false);
     setShowOnlyHiddenGems(false);
     setShowOnlyFlashDeals(false);
-  }, []);
+    
+    toast.info(`Showing experiences in ${currentLocation}`, {
+      description: "Discover local authentic experiences"
+    });
+    
+    const personalized = getPersonalizedExperiences(selectedInterests, currentLocation);
+    setPersonalizedExperiences(personalized);
+  }, [currentLocation]);
   
   const cities = getAllCities();
   const languages = getAllLanguages();
@@ -145,7 +152,6 @@ const Explore = () => {
     });
   };
   
-  // Get filtered experiences based on all criteria
   let filteredExperiences = filterExperiences(
     selectedInterests,
     timeFrame,
@@ -160,10 +166,10 @@ const Explore = () => {
     (selectedAccessibility.mobility.length > 0 || 
      selectedAccessibility.communication.length > 0 || 
      selectedAccessibility.sensory.length > 0 || 
-     selectedAccessibility.freeForAssistants) ? selectedAccessibility : undefined
+     selectedAccessibility.freeForAssistants) ? selectedAccessibility : undefined,
+    currentLocation
   );
   
-  // Apply search query filter
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
     filteredExperiences = filteredExperiences.filter(exp => 
@@ -176,7 +182,6 @@ const Explore = () => {
     );
   }
   
-  // Apply sorting
   filteredExperiences = [...filteredExperiences].sort((a, b) => {
     switch(sortOption) {
       case 'price-asc':
@@ -192,15 +197,12 @@ const Explore = () => {
     }
   });
   
-  // Get curated lists for tabs
   const trendingExperiences = getTrendingExperiences();
   const hiddenGemExperiences = getHiddenGemExperiences();
   const flashDealExperiences = getFlashDealExperiences();
   
-  // Used to prevent rendering TabsContent elements until we have data - fixes the React error
   const hasExperiences = experiences.length > 0;
   
-  // Helper function to count total active filters
   const countActiveFilters = () => {
     return selectedInterests.length + 
            selectedCities.length + 
@@ -226,7 +228,6 @@ const Explore = () => {
       
       <main className="min-h-screen pt-20 pb-16">
         <div className="container px-4 md:px-6">
-          {/* Search & Filter */}
           <div className="mb-8">
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -245,6 +246,13 @@ const Explore = () => {
                   <X className="h-4 w-4" />
                 </button>
               )}
+            </div>
+            
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapPin size={16} className="text-primary" />
+                <span className="text-sm font-medium">Showing experiences in {currentLocation}</span>
+              </div>
             </div>
             
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -299,7 +307,6 @@ const Explore = () => {
             {showFilters && (
               <div className="mt-4 p-4 bg-background border rounded-lg animate-scale-in">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left column */}
                   <div className="space-y-6">
                     <div>
                       <h3 className="font-medium mb-4">Filter by interest</h3>
@@ -443,7 +450,6 @@ const Explore = () => {
                     </div>
                   </div>
                   
-                  {/* Right column */}
                   <div className="space-y-6">
                     <div>
                       <h3 className="font-medium mb-4 flex items-center gap-2">
@@ -586,10 +592,13 @@ const Explore = () => {
             )}
           </div>
           
-          {/* Tabs for different experience types */}
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-8">
             <TabsList className="w-full justify-start overflow-x-auto">
               <TabsTrigger value="all">All Events</TabsTrigger>
+              <TabsTrigger value="personalized" className="flex items-center gap-1">
+                <Sparkles size={14} />
+                For You
+              </TabsTrigger>
               <TabsTrigger value="trending" className="flex items-center gap-1">
                 <Sparkles size={14} />
                 Trending
@@ -607,12 +616,14 @@ const Explore = () => {
             <div className="mb-6 mt-4">
               <h1 className="text-2xl font-bold mb-2">
                 {activeTab === 'all' && 'Explore Events'}
+                {activeTab === 'personalized' && 'Recommended For You'}
                 {activeTab === 'trending' && 'Trending Events'}
                 {activeTab === 'hidden-gems' && 'Hidden Gems'}
                 {activeTab === 'flash-deals' && 'Flash Deals'}
               </h1>
               <p className="text-muted-foreground">
-                {activeTab === 'all' && `${filteredExperiences.length} events in ${selectedCities.length > 0 ? selectedCities.join(', ') : 'KWCG region'}`}
+                {activeTab === 'all' && `${filteredExperiences.length} events in ${currentLocation}`}
+                {activeTab === 'personalized' && `${personalizedExperiences.length} events tailored to your interests`}
                 {activeTab === 'trending' && `${trendingExperiences.length} events everyone's talking about`}
                 {activeTab === 'hidden-gems' && `${hiddenGemExperiences.length} unique experiences you might have missed`}
                 {activeTab === 'flash-deals' && `${flashDealExperiences.length} limited-time deals available now`}
@@ -664,6 +675,41 @@ const Explore = () => {
                       }}>
                         Clear all filters
                       </Button>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="personalized">
+                  {personalizedExperiences.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {personalizedExperiences.map((exp) => (
+                        <ExperienceCard 
+                          key={exp.id}
+                          experience={exp}
+                          onClick={handleExperienceClick}
+                          featured={true}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                        <Sparkles className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">Tell us what you like</h3>
+                      <p className="text-muted-foreground text-center max-w-md mb-6">
+                        Select some interests to help us personalize your experience recommendations.
+                      </p>
+                      <div className="w-full max-w-2xl">
+                        <InterestSelection
+                          selectedInterests={selectedInterests}
+                          onChange={(interests) => {
+                            setSelectedInterests(interests);
+                            const personalized = getPersonalizedExperiences(interests, currentLocation);
+                            setPersonalizedExperiences(personalized);
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
                 </TabsContent>
@@ -734,7 +780,6 @@ const Explore = () => {
         </div>
       </main>
       
-      {/* Booking Modal */}
       <BookingModal
         experience={selectedExperience}
         open={showBookingModal}
@@ -745,3 +790,4 @@ const Explore = () => {
 };
 
 export default Explore;
+

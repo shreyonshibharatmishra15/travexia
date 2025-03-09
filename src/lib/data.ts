@@ -6,28 +6,32 @@ export type Experience = {
   price: number;
   duration: string;
   location: string;
-  city: "Kitchener" | "Waterloo" | "Cambridge" | "Guelph";
+  city: string;
+  region?: string;
+  country?: string;
+  coordinates?: { lat: number; lng: number };
   rating: number;
   reviewCount: number;
   categories: string[];
   provider: string;
   availableTimes: string[];
-  startDate: string; // ISO date string
-  endDate: string;   // ISO date string
+  startDate: string;
+  endDate: string;
   trending?: boolean;
   hiddenGem?: boolean;
   flashDeal?: boolean;
   flashDealEndTime?: string;
   discountPercentage?: number;
   soldOut?: boolean;
-  languages?: string[]; // Available languages
-  activityType?: string[]; // Types of activities
+  languages?: string[];
+  activityType?: string[];
   accessibilityFeatures?: {
     mobility?: string[];
     communication?: string[];
     sensory?: string[];
     freeForAssistants?: boolean;
   };
+  aiRecommendationScore?: number;
 };
 
 export type Interest = {
@@ -372,6 +376,150 @@ export const experiences: Experience[] = [
       freeForAssistants: true
     }
   },
+  {
+    id: '101',
+    title: 'CN Tower Edge Walk',
+    description: 'Experience the thrill of walking on the edge of one of the world\'s tallest buildings with breathtaking views of Toronto.',
+    image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26',
+    price: 195,
+    duration: '1.5 hours',
+    location: 'CN Tower',
+    city: 'Toronto',
+    region: 'Ontario',
+    country: 'Canada',
+    coordinates: { lat: 43.6426, lng: -79.3871 },
+    rating: 4.8,
+    reviewCount: 342,
+    categories: ['Adventure & Outdoor', 'Tours'],
+    provider: 'CN Tower Experiences',
+    availableTimes: ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'],
+    startDate: getISODateInHours(24),
+    endDate: getISODateInHours(25.5),
+    trending: true,
+    languages: ['English', 'French'],
+    activityType: ['Adventure', 'Tours', 'Sightseeing'],
+    accessibilityFeatures: {
+      communication: ['Detailed audio or verbal information'],
+      freeForAssistants: true
+    },
+    aiRecommendationScore: 0.95
+  },
+  {
+    id: '102',
+    title: 'Stanley Park Bike Tour',
+    description: 'Explore Vancouver\'s magnificent Stanley Park on this guided bicycle tour, seeing landmarks and hidden gems.',
+    image: 'https://images.unsplash.com/photo-1509809741902-9a1f18d9dde1',
+    price: 45,
+    duration: '3 hours',
+    location: 'Stanley Park',
+    city: 'Vancouver',
+    region: 'British Columbia',
+    country: 'Canada',
+    coordinates: { lat: 49.3017, lng: -123.1417 },
+    rating: 4.9,
+    reviewCount: 218,
+    categories: ['Adventure & Outdoor', 'Sports', 'Tours'],
+    provider: 'Vancouver Bike Tours',
+    availableTimes: ['10:00 AM', '2:00 PM'],
+    startDate: getISODateInHours(26),
+    endDate: getISODateInHours(29),
+    hiddenGem: true,
+    languages: ['English'],
+    activityType: ['Sports', 'Nature and outdoors', 'Tours'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      freeForAssistants: true
+    },
+    aiRecommendationScore: 0.88
+  },
+  {
+    id: '103',
+    title: 'Times Square Walking Tour',
+    description: 'Discover the bright lights and fascinating history of New York\'s Times Square on this guided walking tour.',
+    image: 'https://images.unsplash.com/photo-1534430480872-3498386e7856',
+    price: 35,
+    duration: '2 hours',
+    location: 'Times Square',
+    city: 'New York',
+    region: 'New York',
+    country: 'United States',
+    coordinates: { lat: 40.7580, lng: -73.9855 },
+    rating: 4.7,
+    reviewCount: 532,
+    categories: ['Tours', 'Local Culture', 'Festivals & Culture'],
+    provider: 'NYC Walking Tours',
+    availableTimes: ['10:00 AM', '1:00 PM', '4:00 PM', '7:00 PM'],
+    startDate: getISODateInHours(48),
+    endDate: getISODateInHours(50),
+    trending: true,
+    languages: ['English', 'Spanish'],
+    activityType: ['Tours', 'History', 'Sightseeing'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      freeForAssistants: true
+    },
+    aiRecommendationScore: 0.82
+  },
+  {
+    id: '104',
+    title: 'Tokyo Sushi Making Class',
+    description: 'Learn to make authentic sushi with a professional chef in this hands-on culinary experience.',
+    image: 'https://images.unsplash.com/photo-1553621042-f6e147245754',
+    price: 80,
+    duration: '2.5 hours',
+    location: 'Tsukiji Outer Market',
+    city: 'Tokyo',
+    country: 'Japan',
+    coordinates: { lat: 35.6652, lng: 139.7698 },
+    rating: 4.9,
+    reviewCount: 176,
+    categories: ['Food & Drink', 'Workshops & Community'],
+    provider: 'Tokyo Culinary Academy',
+    availableTimes: ['11:00 AM', '2:00 PM', '5:00 PM'],
+    startDate: getISODateInHours(72),
+    endDate: getISODateInHours(74.5),
+    hiddenGem: true,
+    languages: ['English', 'Japanese'],
+    activityType: ['Food and drink', 'Workshops', 'Art and culture'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      freeForAssistants: true
+    },
+    aiRecommendationScore: 0.93
+  },
+  {
+    id: '105',
+    title: 'Paris Night Photography Tour',
+    description: 'Capture the magic of Paris at night, including the Eiffel Tower light show, on this guided photography tour.',
+    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34',
+    price: 65,
+    duration: '3 hours',
+    location: 'Trocadero',
+    city: 'Paris',
+    country: 'France',
+    coordinates: { lat: 48.8584, lng: 2.2945 },
+    rating: 4.8,
+    reviewCount: 248,
+    categories: ['Tours', 'Festivals & Culture', 'Workshops & Community'],
+    provider: 'Paris Photo Tours',
+    availableTimes: ['7:00 PM', '8:00 PM'],
+    startDate: getISODateInHours(48),
+    endDate: getISODateInHours(51),
+    flashDeal: true,
+    flashDealEndTime: getISODateInHours(24),
+    discountPercentage: 15,
+    languages: ['English', 'French'],
+    activityType: ['Art and culture', 'Tours', 'Workshops'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      freeForAssistants: true
+    },
+    aiRecommendationScore: 0.89
+  }
 ];
 
 const isAvailableToday = (exp: Experience): boolean => {
@@ -407,7 +555,8 @@ export function filterExperiences(
     communication?: string[],
     sensory?: string[],
     freeForAssistants?: boolean
-  }
+  },
+  location?: string
 ): Experience[] {
   return experiences.filter(exp => {
     const matchesInterests = selectedInterests.length === 0 || 
@@ -418,8 +567,14 @@ export function filterExperiences(
       (timeFrame === 'today' && isAvailableToday(exp)) ||
       (timeFrame === 'next48hours' && isAvailableWithin48Hours(exp));
     
-    const matchesCities = cities.length === 0 || 
-      cities.includes(exp.city);
+    let matchesCities = true;
+    if (cities.length > 0) {
+      matchesCities = cities.includes(exp.city);
+    } else if (location) {
+      matchesCities = exp.city.toLowerCase().includes(location.toLowerCase()) || 
+                     (exp.region && exp.region.toLowerCase().includes(location.toLowerCase())) ||
+                     (exp.country && exp.country.toLowerCase().includes(location.toLowerCase()));
+    }
     
     const matchesTrending = !onlyTrending || exp.trending;
     const matchesHiddenGems = !onlyHiddenGems || exp.hiddenGem;
@@ -571,4 +726,58 @@ export function getAllAccessibilityFeatures(): {
     communication: Array.from(communication),
     sensory: Array.from(sensory)
   };
+}
+
+export function getPersonalizedExperiences(userInterests: string[], location: string): Experience[] {
+  return experiences
+    .filter(exp => {
+      const matchesLocation = !location || 
+                             exp.city.toLowerCase().includes(location.toLowerCase()) || 
+                             (exp.region && exp.region.toLowerCase().includes(location.toLowerCase())) ||
+                             (exp.country && exp.country.toLowerCase().includes(location.toLowerCase()));
+      
+      const matchesInterests = userInterests.length === 0 || 
+        exp.categories.some(category => userInterests.includes(category));
+      
+      return matchesLocation && matchesInterests;
+    })
+    .sort((a, b) => {
+      const scoreA = a.aiRecommendationScore || 0.5;
+      const scoreB = b.aiRecommendationScore || 0.5;
+      return scoreB - scoreA;
+    })
+    .slice(0, 10);
+}
+
+export function getAllRegions(): string[] {
+  const regions = new Set<string>();
+  experiences.forEach(exp => {
+    if (exp.region) {
+      regions.add(exp.region);
+    }
+  });
+  return Array.from(regions);
+}
+
+export function getAllCountries(): string[] {
+  const countries = new Set<string>();
+  experiences.forEach(exp => {
+    if (exp.country) {
+      countries.add(exp.country);
+    }
+  });
+  return Array.from(countries);
+}
+
+export function getCitiesByRegionOrCountry(region?: string, country?: string): string[] {
+  return Array.from(
+    new Set(
+      experiences
+        .filter(exp => 
+          (!region || exp.region === region) && 
+          (!country || exp.country === country)
+        )
+        .map(exp => exp.city)
+    )
+  );
 }
