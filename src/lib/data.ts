@@ -571,9 +571,7 @@ export function filterExperiences(
     if (cities.length > 0) {
       matchesCities = cities.includes(exp.city);
     } else if (location) {
-      matchesCities = exp.city.toLowerCase().includes(location.toLowerCase()) || 
-                     (exp.region && exp.region.toLowerCase().includes(location.toLowerCase())) ||
-                     (exp.country && exp.country.toLowerCase().includes(location.toLowerCase()));
+      matchesCities = exp.city === location;
     }
     
     const matchesTrending = !onlyTrending || exp.trending;
@@ -732,9 +730,7 @@ export function getPersonalizedExperiences(userInterests: string[], location: st
   return experiences
     .filter(exp => {
       const matchesLocation = !location || 
-                             exp.city.toLowerCase().includes(location.toLowerCase()) || 
-                             (exp.region && exp.region.toLowerCase().includes(location.toLowerCase())) ||
-                             (exp.country && exp.country.toLowerCase().includes(location.toLowerCase()));
+                             exp.city === location;
       
       const matchesInterests = userInterests.length === 0 || 
         exp.categories.some(category => userInterests.includes(category));
