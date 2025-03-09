@@ -1,4 +1,3 @@
-
 export type Experience = {
   id: string;
   title: string;
@@ -21,6 +20,14 @@ export type Experience = {
   flashDealEndTime?: string;
   discountPercentage?: number;
   soldOut?: boolean;
+  languages?: string[]; // Available languages
+  activityType?: string[]; // Types of activities
+  accessibilityFeatures?: {
+    mobility?: string[];
+    communication?: string[];
+    sensory?: string[];
+    freeForAssistants?: boolean;
+  };
 };
 
 export type Interest = {
@@ -42,14 +49,12 @@ export const interests: Interest[] = [
   { id: '10', name: 'Local Culture', icon: 'landmark' },
 ];
 
-// Helper function to create ISO date strings for the next N hours
 const getISODateInHours = (hoursFromNow: number): string => {
   const date = new Date();
   date.setHours(date.getHours() + hoursFromNow);
   return date.toISOString();
 };
 
-// Create experiences with realistic dates within the next 48 hours
 export const experiences: Experience[] = [
   {
     id: '1',
@@ -67,7 +72,15 @@ export const experiences: Experience[] = [
     availableTimes: ['10:00 AM', '1:00 PM', '4:00 PM'],
     startDate: getISODateInHours(2),
     endDate: getISODateInHours(4),
-    trending: true
+    trending: true,
+    languages: ['English', 'French'],
+    activityType: ['Food and drink', 'Tours', 'Sightseeing'],
+    accessibilityFeatures: {
+      mobility: ['No stairs or steps', 'Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '2',
@@ -87,7 +100,13 @@ export const experiences: Experience[] = [
     endDate: getISODateInHours(9),
     flashDeal: true,
     flashDealEndTime: getISODateInHours(3),
-    discountPercentage: 15
+    discountPercentage: 15,
+    languages: ['English'],
+    activityType: ['Food and drink', 'Entertainment'],
+    accessibilityFeatures: {
+      mobility: ['Accessible parking spot'],
+      freeForAssistants: true
+    }
   },
   {
     id: '3',
@@ -105,7 +124,15 @@ export const experiences: Experience[] = [
     availableTimes: ['11:00 AM', '3:00 PM'],
     startDate: getISODateInHours(24),
     endDate: getISODateInHours(26.5),
-    hiddenGem: true
+    hiddenGem: true,
+    languages: ['English'],
+    activityType: ['Art and crafts', 'Workshops'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '4',
@@ -123,7 +150,15 @@ export const experiences: Experience[] = [
     availableTimes: ['9:00 AM', '1:00 PM'],
     startDate: getISODateInHours(5),
     endDate: getISODateInHours(8),
-    trending: true
+    trending: true,
+    languages: ['English'],
+    activityType: ['Water activities', 'Outdoor'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '5',
@@ -141,7 +176,15 @@ export const experiences: Experience[] = [
     availableTimes: ['8:00 PM', '10:30 PM'],
     startDate: getISODateInHours(10),
     endDate: getISODateInHours(12.5),
-    soldOut: true
+    soldOut: true,
+    languages: ['English'],
+    activityType: ['Music', 'Entertainment'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '6',
@@ -159,7 +202,14 @@ export const experiences: Experience[] = [
     availableTimes: ['8:00 AM', '4:00 PM'],
     startDate: getISODateInHours(27),
     endDate: getISODateInHours(29),
-    hiddenGem: true
+    hiddenGem: true,
+    languages: ['English', 'Japanese'],
+    activityType: ['Wellness', 'Nature and outdoors'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      sensory: ['Quiet retreat space available'],
+      freeForAssistants: true
+    }
   },
   {
     id: '7',
@@ -177,7 +227,15 @@ export const experiences: Experience[] = [
     availableTimes: ['10:00 AM', '2:00 PM', '5:00 PM'],
     startDate: getISODateInHours(3),
     endDate: getISODateInHours(4.5),
-    trending: true
+    trending: true,
+    languages: ['English'],
+    activityType: ['Tours', 'History'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '8',
@@ -197,7 +255,15 @@ export const experiences: Experience[] = [
     endDate: getISODateInHours(9),
     flashDeal: true,
     flashDealEndTime: getISODateInHours(4),
-    discountPercentage: 20
+    discountPercentage: 20,
+    languages: ['English'],
+    activityType: ['Dance', 'Workshops'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '9',
@@ -215,7 +281,15 @@ export const experiences: Experience[] = [
     availableTimes: ['11:00 AM', '2:00 PM', '4:00 PM'],
     startDate: getISODateInHours(25),
     endDate: getISODateInHours(26.5),
-    hiddenGem: true
+    hiddenGem: true,
+    languages: ['English'],
+    activityType: ['Nature and outdoors', 'Family-friendly'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '10',
@@ -233,7 +307,15 @@ export const experiences: Experience[] = [
     availableTimes: ['3:00 PM', '7:00 PM'],
     startDate: getISODateInHours(6),
     endDate: getISODateInHours(8),
-    trending: true
+    trending: true,
+    languages: ['English'],
+    activityType: ['Food and drink', 'Tours'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '11',
@@ -254,7 +336,15 @@ export const experiences: Experience[] = [
     trending: true,
     flashDeal: true,
     flashDealEndTime: getISODateInHours(20),
-    discountPercentage: 10
+    discountPercentage: 10,
+    languages: ['English'],
+    activityType: ['Food and drink', 'Entertainment', 'Nightlife'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
   {
     id: '12',
@@ -272,11 +362,18 @@ export const experiences: Experience[] = [
     availableTimes: ['10:00 AM', '2:00 PM'],
     startDate: getISODateInHours(48),
     endDate: getISODateInHours(50.5),
-    hiddenGem: true
+    hiddenGem: true,
+    languages: ['English'],
+    activityType: ['Tours', 'Workshops'],
+    accessibilityFeatures: {
+      mobility: ['Mainly flat or levelled ground'],
+      communication: ['Detailed audio or verbal information'],
+      sensory: ['No extreme sensory stimuli'],
+      freeForAssistants: true
+    }
   },
 ];
 
-// Determine if an experience is available today
 const isAvailableToday = (exp: Experience): boolean => {
   const start = new Date(exp.startDate);
   const now = new Date();
@@ -286,7 +383,6 @@ const isAvailableToday = (exp: Experience): boolean => {
   return start >= todayStart && start <= todayEnd;
 };
 
-// Determine if an experience is available within the next 48 hours
 const isAvailableWithin48Hours = (exp: Experience): boolean => {
   const start = new Date(exp.startDate);
   const now = new Date();
@@ -295,7 +391,6 @@ const isAvailableWithin48Hours = (exp: Experience): boolean => {
   return start >= now && start <= future48Hours;
 };
 
-// Enhanced filtering function that supports multiple filters
 export function filterExperiences(
   selectedInterests: string[] = [],
   timeFrame: 'today' | 'next48hours' | 'all' = 'all',
@@ -303,30 +398,76 @@ export function filterExperiences(
   onlyTrending: boolean = false,
   onlyHiddenGems: boolean = false,
   onlyFlashDeals: boolean = false,
-  maxPrice?: number
+  maxPrice?: number,
+  timeOfDay?: ('morning' | 'afternoon' | 'evening')[],
+  languages?: string[],
+  activityTypes?: string[],
+  accessibilityFeatures?: {
+    mobility?: string[],
+    communication?: string[],
+    sensory?: string[],
+    freeForAssistants?: boolean
+  }
 ): Experience[] {
   return experiences.filter(exp => {
-    // Filter by interests
     const matchesInterests = selectedInterests.length === 0 || 
       exp.categories.some(category => selectedInterests.includes(category));
     
-    // Filter by time frame
     const matchesTimeFrame = 
       timeFrame === 'all' ||
       (timeFrame === 'today' && isAvailableToday(exp)) ||
       (timeFrame === 'next48hours' && isAvailableWithin48Hours(exp));
     
-    // Filter by cities
     const matchesCities = cities.length === 0 || 
       cities.includes(exp.city);
     
-    // Filter by special categories
     const matchesTrending = !onlyTrending || exp.trending;
     const matchesHiddenGems = !onlyHiddenGems || exp.hiddenGem;
     const matchesFlashDeals = !onlyFlashDeals || exp.flashDeal;
     
-    // Filter by price
     const matchesPrice = !maxPrice || exp.price <= maxPrice;
+    
+    let matchesTimeOfDay = true;
+    if (timeOfDay && timeOfDay.length > 0) {
+      const expStartDate = new Date(exp.startDate);
+      const expTimeOfDay = getTimeOfDay(expStartDate);
+      matchesTimeOfDay = timeOfDay.includes(expTimeOfDay);
+    }
+    
+    let matchesLanguages = true;
+    if (languages && languages.length > 0 && exp.languages) {
+      matchesLanguages = languages.some(lang => exp.languages?.includes(lang));
+    }
+    
+    let matchesActivityTypes = true;
+    if (activityTypes && activityTypes.length > 0 && exp.activityType) {
+      matchesActivityTypes = activityTypes.some(type => exp.activityType?.includes(type));
+    }
+    
+    let matchesAccessibility = true;
+    if (accessibilityFeatures) {
+      if (accessibilityFeatures.mobility && accessibilityFeatures.mobility.length > 0) {
+        matchesAccessibility = matchesAccessibility && accessibilityFeatures.mobility.some(
+          feature => exp.accessibilityFeatures?.mobility?.includes(feature)
+        );
+      }
+      
+      if (accessibilityFeatures.communication && accessibilityFeatures.communication.length > 0) {
+        matchesAccessibility = matchesAccessibility && accessibilityFeatures.communication.some(
+          feature => exp.accessibilityFeatures?.communication?.includes(feature)
+        );
+      }
+      
+      if (accessibilityFeatures.sensory && accessibilityFeatures.sensory.length > 0) {
+        matchesAccessibility = matchesAccessibility && accessibilityFeatures.sensory.some(
+          feature => exp.accessibilityFeatures?.sensory?.includes(feature)
+        );
+      }
+      
+      if (accessibilityFeatures.freeForAssistants) {
+        matchesAccessibility = matchesAccessibility && exp.accessibilityFeatures?.freeForAssistants === true;
+      }
+    }
     
     return matchesInterests && 
            matchesTimeFrame && 
@@ -334,7 +475,11 @@ export function filterExperiences(
            matchesTrending && 
            matchesHiddenGems && 
            matchesFlashDeals && 
-           matchesPrice;
+           matchesPrice &&
+           matchesTimeOfDay &&
+           matchesLanguages &&
+           matchesActivityTypes &&
+           matchesAccessibility;
   });
 }
 
@@ -342,17 +487,14 @@ export function getExperienceById(id: string): Experience | undefined {
   return experiences.find(exp => exp.id === id);
 }
 
-// Get trending experiences
 export function getTrendingExperiences(): Experience[] {
   return experiences.filter(exp => exp.trending && isAvailableWithin48Hours(exp));
 }
 
-// Get hidden gems
 export function getHiddenGemExperiences(): Experience[] {
   return experiences.filter(exp => exp.hiddenGem && isAvailableWithin48Hours(exp));
 }
 
-// Get flash deals
 export function getFlashDealExperiences(): Experience[] {
   const now = new Date();
   return experiences.filter(exp => {
@@ -362,16 +504,71 @@ export function getFlashDealExperiences(): Experience[] {
   });
 }
 
-// Get all available cities
 export function getAllCities(): string[] {
   return Array.from(new Set(experiences.map(exp => exp.city)));
 }
 
-// Calculate discounted price if applicable
 export function getDisplayPrice(experience: Experience): number {
   if (experience.flashDeal && experience.discountPercentage) {
     const discount = experience.price * (experience.discountPercentage / 100);
     return experience.price - discount;
   }
   return experience.price;
+}
+
+export function getTimeOfDay(date: Date): 'morning' | 'afternoon' | 'evening' {
+  const hours = date.getHours();
+  if (hours < 12) return 'morning';
+  if (hours < 17) return 'afternoon';
+  return 'evening';
+}
+
+export function getAllLanguages(): string[] {
+  const allLanguages = new Set<string>();
+  experiences.forEach(exp => {
+    if (exp.languages) {
+      exp.languages.forEach(lang => allLanguages.add(lang));
+    }
+  });
+  return Array.from(allLanguages);
+}
+
+export function getAllActivityTypes(): string[] {
+  const allTypes = new Set<string>();
+  experiences.forEach(exp => {
+    if (exp.activityType) {
+      exp.activityType.forEach(type => allTypes.add(type));
+    }
+  });
+  return Array.from(allTypes);
+}
+
+export function getAllAccessibilityFeatures(): {
+  mobility: string[];
+  communication: string[];
+  sensory: string[];
+} {
+  const mobility = new Set<string>();
+  const communication = new Set<string>();
+  const sensory = new Set<string>();
+  
+  experiences.forEach(exp => {
+    if (exp.accessibilityFeatures) {
+      if (exp.accessibilityFeatures.mobility) {
+        exp.accessibilityFeatures.mobility.forEach(feature => mobility.add(feature));
+      }
+      if (exp.accessibilityFeatures.communication) {
+        exp.accessibilityFeatures.communication.forEach(feature => communication.add(feature));
+      }
+      if (exp.accessibilityFeatures.sensory) {
+        exp.accessibilityFeatures.sensory.forEach(feature => sensory.add(feature));
+      }
+    }
+  });
+  
+  return {
+    mobility: Array.from(mobility),
+    communication: Array.from(communication),
+    sensory: Array.from(sensory)
+  };
 }
