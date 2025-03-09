@@ -73,14 +73,13 @@ const SortOptions = ({ timeFrame, setTimeFrame, setSortOption, sortOption }: Sor
               return date < today || date > maxDate;
             }}
             initialFocus
-            className={cn("p-3 pointer-events-auto")}
           />
         </PopoverContent>
       </Popover>
       
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
+          variant={sortOption === 'time-asc' ? 'default' : 'ghost'}
           size="sm"
           className="gap-1 text-xs"
           onClick={() => setSortOption('time-asc')}
@@ -89,13 +88,13 @@ const SortOptions = ({ timeFrame, setTimeFrame, setSortOption, sortOption }: Sor
           Soonest
         </Button>
         <Button
-          variant="ghost"
+          variant={sortOption === 'price-asc' || sortOption === 'price-desc' ? 'default' : 'ghost'}
           size="sm"
           className="gap-1 text-xs"
           onClick={() => setSortOption(sortOption === 'price-asc' ? 'price-desc' : 'price-asc')}
         >
           <ArrowDownUp size={14} />
-          Price
+          Price {sortOption === 'price-asc' ? '↑' : sortOption === 'price-desc' ? '↓' : ''}
         </Button>
       </div>
     </div>
